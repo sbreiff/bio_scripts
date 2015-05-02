@@ -1,7 +1,18 @@
+#!/usr/bin/env python
+
+'''
+Takes as input a gff file containing genes in a genome and the fasta file of that genome,
+and outputs a fasta file of the genes specified in the gff file.
+
+Example usage:
+$ python gff_to_fasta.py genes.gff genome.fasta genes.fasta
+
+'''
+
 import csv
 from Bio import SeqIO
 from sys import argv
-from RC import reverse_complement
+from SeqTools import rev_comp
 
 gff_file = argv[1]
 genome_file = argv[2]
@@ -35,7 +46,7 @@ class Gene(object):
 		for item in self.coords:
 			self.seq = self.seq + seq[int(item[0])-1:int(item[1])]
 		if self.strand == "-":
-			self.seq = reverse_complement(self.seq)
+			self.seq = rev_comp(self.seq)
 
 # incorporate introns into sequence as lowercase
 			

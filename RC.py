@@ -1,3 +1,8 @@
+# ****** Do not use this for any new scripts!!!
+# ****** Use the rev_comp function in SeqTools instead!!!
+# ****** This file will be kept in case previous scripts still try to import it.
+
+
 def reverse_complement(seq):
 """
 Reverse complements a nucleotide sequence.

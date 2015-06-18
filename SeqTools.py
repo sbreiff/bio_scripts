@@ -6,8 +6,9 @@ genetic data.
 
 Currently contains:
 rev_comp - find reverse complement of a DNA or RNA sequence.
+genetic_code - returns dictionary containing the genetic code corresponding to
+    the input number.
 translate - translates a dna sequence into its (1-frame) protein sequence.
-
 '''
 
 def rev_comp(dna):
@@ -46,33 +47,17 @@ def rev_comp(dna):
 
 
 
-def translate(dna, code = 1):
+def geneticCode(code):
     '''
-    Translates a DNA or RNA sequence to its corresponding protein sequence.
-    Takes in a string representing a DNA/RNA sequence and an integer representing
-    the genetic code/translation table to be used and returns a string 
-    representing the protein sequence.
-    
-    Usage:   translate(dna, code = 1)
-    
-    Example Usage:
-    >>> translate('ATGTGA')
-    M*
-    >>> translate('ATGTGA', 2)
-    MW
+    Given a numerical code, this function returns a dictionary 
+    containing the appropriate genetic code.
 
-    Parameters:
-    dna - string comprising a dna or rna sequence - must only contain letters 
-          A, C, G, and either T or U. Can be uppercase or lowercase.
-    code - the number of the genetic code/translation table to be used. See
-           below. If no code is given, standard code is used.
-    
     Genetic Codes:
     1 - Standard Code
     2 - Vertebrate Mitochondrial Code
     3 - Yeast Mitochondrial Code
-    4 - Mold/Protozoan/Coelenterate Mitochondrial Code and Mycoplasma/
-    Spiroplasma Code
+    4 - Mold/Protozoan/Coelenterate Mitochondrial Code and 
+    Mycoplasma/Spiroplasma Code
     5 - Invertebrate Mitochondrial Code
     6 - Ciliate/Dasycladacean/Hexamita Nuclear Code
     9 - Echinoderm/Flatworm Mitochondrial Code
@@ -87,12 +72,8 @@ def translate(dna, code = 1):
     22 - Scenedesmus obliquus Mitochondrial Code
     23 - Thraustochytrium Mitochondrial Code
     24 - Pterobranchia Mitochondrial Code
-    25 - Candidate Division SR1/Gracilibacteria Code
+    25 - Candidate Division SR1/Gracilibacteria Code   
     '''
-
-    # if dna parameter is an RNA sequence, convert to corresponding DNA sequence
-    if 'U' in dna.upper() and 'T' not in dna.upper():
-        dna = dna.upper().replace('U', 'T')
 
     # standard genetic code
     genetic_code = {'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A', 'TGC':'C',
@@ -104,7 +85,7 @@ def translate(dna, code = 1):
             'CCT':'P', 'CAA':'Q', 'CAG':'Q', 'AGA':'R', 'AGG':'R', 'CGA':'R',
             'CGC':'R', 'CGG':'R', 'CGT':'R', 'AGC':'S', 'AGT':'S', 'TCA':'S', 
             'TCC':'S', 'TCG':'S', 'TCT':'S', 'ACA':'T', 'ACC':'T', 'ACG':'T', 
-            'ACT':'T', 'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V', 'UGG':'W', 
+            'ACT':'T', 'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V', 'TGG':'W', 
             'TAC':'Y', 'TAT':'Y', 'TAA':'*', 'TAG':'*', 'TGA':'*'}
     
     # check for valid genetic code number
@@ -157,8 +138,40 @@ def translate(dna, code = 1):
             genetic_code['AGG'] = 'K'
         elif code == 25:
             genetic_code['TGA'] = 'G'
+
+    return genetic_code
+
+
+
+def translate(dna, code = 1):
+    '''
+    Translates a DNA or RNA sequence to its corresponding protein sequence.
+    Takes in a string representing a DNA/RNA sequence and an integer representing
+    the genetic code/translation table to be used and returns a string 
+    representing the protein sequence.
+    
+    Usage:   translate(dna, code = 1)
+    
+    Example Usage:
+    >>> translate('ATGTGA')
+    M*
+    >>> translate('ATGTGA', 2)
+    MW
+
+    Parameters:
+    dna - string comprising a dna or rna sequence - must only contain letters 
+          A, C, G, and either T or U. Can be uppercase or lowercase.
+    code - the number of the genetic code/translation table to be used. See
+           below. If no code is given, standard code is used.
+    '''
+
+    # if dna parameter is an RNA sequence, convert to corresponding DNA sequence
+    if 'U' in dna.upper() and 'T' not in dna.upper():
+        dna = dna.upper().replace('U', 'T')
+
+    geneticCodeDict = geneticCode(code)
     
     protein = ''
     for i in range(0, len(dna), 3): # translate each codon to its aa
-        protein = protein + genetic_code[dna[i:i+3].upper()]
+        protein = protein + geneticCodeDict[dna[i:i+3].upper()]
     return protein

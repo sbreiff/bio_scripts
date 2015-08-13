@@ -29,8 +29,15 @@ while True:
         if gene.id == gene_name:
             seq = str(gene.seq)
     f_primer = raw_input("Forward primer: ").upper().replace(' ', '')
+    if f_primer not in seq:
+        print "Forward primer not present in DNA sequence."
+        continue
     r_primer = rev_comp(raw_input("Reverse primer: ").replace(' ', '')).upper()
-    length = seq.index(r_primer) - seq.index(f_primer) + len(r_primer)
-    # print seq.index(f_primer)
-    # print seq.index(r_primer)
-    print "PCR Product Length: %d bp" % length
+    if r_primer not in seq:
+        print "Reverse primer not present in DNA sequence."
+        continue
+    else:
+        length = seq.index(r_primer) - seq.index(f_primer) + len(r_primer)
+        # print seq.index(f_primer)
+        # print seq.index(r_primer)
+        print "PCR Product Length: %d bp" % length

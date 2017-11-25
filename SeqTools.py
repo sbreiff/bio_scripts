@@ -8,7 +8,12 @@ Currently contains:
 rev_comp - find reverse complement of a DNA or RNA sequence.
 genetic_code - returns dictionary containing the genetic code corresponding to
     the input number.
+transcribe - replaces Ts with Us in a DNA sequence.
 translate - translates a dna sequence into its (1-frame) protein sequence.
+is_orf - checks whether a nucleotide sequence is an unbroken open reading frame.
+count_nts - counts number of each nucleotide in a DNA sequence.
+gc - calculates % GC content in a nucleotide sequence.
+get_orfs - returns all unbroken open reading frames above a minimum length in a nucleotide sequence.
 '''
 
 def rev_comp(dna):
@@ -26,7 +31,7 @@ def rev_comp(dna):
     '''
 
     # dictionary determining the reverse complement of each base
-    rc_dict = {'A':'T', 'C':'G', 'G':'C', 'T':'A', 'a':'t', 'g':'c', 'c':'g', 't':'a'}
+    rc_dict = {'A':'T', 'C':'G', 'G':'C', 'T':'A', 'a':'t', 'g':'c', 'c':'g', 't':'a', 'N':'N'}
     
     # check whether sequence has Us and no Ts, in which case the dictionary is
     #     modified for RNA sequences   
@@ -142,6 +147,20 @@ def geneticCode(code):
     return genetic_code
 
 
+def transcribe(dna):
+    '''
+    Transcribes a DNA sequence into its corresponding RNA sequence.
+    Input is a DNA sequence which can be uppercase and/or lowercase.
+    Output is an RNA sequence in the same case as the input.
+
+    Example Usage:
+    >>> transcribe('ATGTGA')
+    AUGUGA
+    >>> transcribe('ATGgtattaaatacacagTGA')
+    AUGguauuaaauacacagUGA
+    '''
+    return dna.replace('T', 'U').replace('t', 'u')
+
 
 def translate(dna, code = 1):
     '''
@@ -173,5 +192,63 @@ def translate(dna, code = 1):
     
     protein = ''
     for i in range(0, len(dna), 3): # translate each codon to its aa
-        protein = protein + geneticCodeDict[dna[i:i+3].upper()]
+        if 'N' in dna[i:i+3].upper():
+            protein = protein + 'X'
+        elif len(dna[i:]) >= 3:
+            protein = protein + geneticCodeDict[dna[i:i+3].upper()]
     return protein
+
+def is_orf(protein):
+    if protein.startswith('M') and protein.endswith('*') and '*' not in protein[:-1]:
+        return True
+    return False
+
+
+def count_nts(seq):
+    '''
+    '''
+    if 'U' in seq and 'T' not in seq:
+        return {'A': seq.upper().count('A'), 'C': seq.upper().count('C'), 
+                'G': seq.upper().count('G'), 'T': seq.upper().count('T')}
+    elif 'T' in seq and 'U' not in seq:
+        return {'A': seq.upper().count('A'), 'C': seq.upper().count('C'), 
+                'G': seq.upper().count('G'), 'U': seq.upper().count('U')}
+    else:
+        print "Sequence error: both Ts and Us in sequence"
+        return
+
+
+def gc(seq):
+    '''
+    '''
+    counts = count_nts(seq)
+    return counts['C'] + counts['G']/float(len(seq))
+
+def get_orfs(seq, min_length = 100, genetic_code = 1, rc = False):
+    '''
+    '''
+    #orfs = []
+    #for i in range(len(seq) - min_length):
+    #    if seq[i:i+3] == 'ATG':
+    #        translation = translate(seq[i:], genetic_code)
+    #        if '*' in translation:
+    #            coding = seq[i:(3*translation.index('*'))+i+3]
+    #            subseq = False
+    #            if orfs:
+    #                for orf in orfs:
+    #                    if coding in orf:
+    #                        subseq = True
+    #            if not subseq:
+    #                orfs.append(coding)
+    coords = []
+    for i in [0, 1, 2]:
+        translation = translate(seq[i:], genetic_code)
+        starts = [a for a, x in enumerate(translation) if x == 'M']
+        coords = coords + [(start*3+i, translation.index('*', start)*3+i+3) for start in starts if '*' in translation[start:]]
+    non_redundant = [(min([coord[0] for coord in [item for item in coords if item[1] == j]]), j) for j in list(set([x[1] for x in coords]))]
+    non_redundant.sort()
+    orfs = [seq[item[0]:item[1]] for item in non_redundant if item[1] - item[0] >= min_length]
+    if rc:
+        return orfs
+    else:
+        return orfs + get_orfs(rev_comp(seq), min_length, genetic_code, True)

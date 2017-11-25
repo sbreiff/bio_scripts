@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 Input: file containing list of protein IDs
 Output: fasta file containing all proteins specified in input file
